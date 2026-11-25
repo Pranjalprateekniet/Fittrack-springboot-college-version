@@ -1,0 +1,8 @@
+package com.pranjal.fittrackv2.nutrition.exception;
+
+public class FoodNotFoundException extends RuntimeException {
+    public FoodNotFoundException(String message) {
+        super(message);
+    }
+}
+

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | FitTrack V2</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <link rel="stylesheet" th:href="@{/css/auth.css}" />
+</head>
+<body class="auth-page">
+
+<div class="auth-card">
+  <div class="auth-brand">
+    <h1>FitTrack V2</h1>
+    <p>Sign in to your fitness &amp; nutrition dashboard</p>
+  </div>
+
+  <div th:if="${param.error}" class="alert alert-error">
+    Invalid email or password. Please try again.
+  </div>
+  <div th:if="${param.logout}" class="alert alert-info">
+    You have been signed out successfully.
+  </div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+  <form th:action="@{/login}" method="post">
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input id="email" name="email" type="email" class="form-control" placeholder="student@fittrack.edu" required autofocus />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" class="form-control" placeholder="Enter your password" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary auth-btn">Sign In</button>
+  </form>
+
+  <div class="auth-footer">
+    Don't have an account? <a th:href="@{/register}">Create an account</a>
+  </div>
+</div>
+
+</body>
+</html>
+

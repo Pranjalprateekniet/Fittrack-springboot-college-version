@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Workouts')}"></head>
+<body>
+<div class="app-shell">
+  <aside th:replace="~{fragments/layout :: sidebar('workouts')}"></aside>
+  <div class="main-area">
+    <header th:replace="~{fragments/layout :: topbar('Workouts')}"></header>
+
+    <main class="content">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Workouts</div>
+          <div class="stat-value" th:text="${#lists.size(workouts)}">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Duration</div>
+          <div class="stat-value" th:text="${totalMinutes} + ' min'">0 min</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Calories Burned</div>
+          <div class="stat-value" th:text="${totalCalories} + ' kcal'">0 kcal</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Log New Workout</h2>
+        </div>
+
+        <form th:action="@{/workouts}" method="post">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="workout-category">Category</label>
+              <select id="workout-category" name="category" class="form-control" required>
+                <option th:each="c : ${categories}" th:value="${c}" th:text="${c.name()}"></option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="workout-exercise">Exercise</label>
+              <select id="workout-exercise" name="exercise" class="form-control" required>
+                <option th:each="e : ${exercises}" th:value="${e}" th:text="${e.name().replace('_', ' ')}"></option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="workout-intensity">Intensity</label>
+              <select id="workout-intensity" name="intensity" class="form-control" required>
+                <option th:each="i : ${intensities}" th:value="${i}" th:text="${i.name().replace('_', ' ')}"></option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="workout-date">Workout Date</label>
+              <input id="workout-date" type="date" name="workoutDate" th:value="${today}" class="form-control" required />
+            </div>
+          </div>
+
+          <div id="strength-fields" class="form-grid">
+            <div class="form-group">
+              <label for="sets">Sets</label>
+              <input id="sets" type="number" name="sets" min="1" value="3" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="reps">Reps</label>
+              <input id="reps" type="number" name="reps" min="1" value="10" class="form-control" />
+            </div>
+          </div>
+
+          <div id="duration-fields" class="form-group" style="display:none; max-width: 240px;">
+            <label for="durationMinutes">Duration (minutes)</label>
+            <input id="durationMinutes" type="number" name="durationMinutes" min="1" value="30" class="form-control" />
+          </div>
+
+          <button type="submit" class="btn btn-primary">Add Workout</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Workout History</h2>
+        </div>
+
+        <div th:if="${#lists.isEmpty(workouts)}" class="text-muted">No workouts recorded yet.</div>
+
+        <div class="table-wrapper" th:if="${!#lists.isEmpty(workouts)}">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Exercise</th>
+                <th>Details</th>
+                <th>Intensity</th>
+                <th>Est. Duration</th>
+                <th>Calories Burned</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <th:block th:each="w : ${workouts}">
+                <tr>
+                  <td th:text="${w.workoutDate}">2026-11-25</td>
+                  <td><span class="badge" th:text="${w.category}">STRENGTH</span></td>
+                  <td th:text="${w.exercise.name().replace('_', ' ')}">BENCH PRESS</td>
+                  <td th:text="${w.category.name() == 'STRENGTH' ? (w.sets + ' sets x ' + w.reps + ' reps') : (w.durationMinutes + ' min')}">3 x 10</td>
+                  <td th:text="${w.intensity.name().replace('_', ' ')}">MODERATE</td>
+                  <td th:text="${w.estimatedDuration} + ' min'">20 min</td>
+                  <td th:text="${#numbers.formatDecimal(w.caloriesBurned, 1, 0)} + ' kcal'">120 kcal</td>
+                  <td>
+                    <div class="inline-actions">
+                      <button type="button" class="btn btn-secondary btn-sm" th:attr="data-toggle-edit='edit-w-' + ${w.id}">Edit</button>
+                      <form th:action="@{/workouts/{id}/delete(id=${w.id})}" method="post">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                <tr th:id="'edit-w-' + ${w.id}" style="display:none; background:#f8fafc;">
+                  <td colspan="8">
+                    <form th:action="@{/workouts/{id}/update(id=${w.id})}" method="post" class="form-grid">
+                      <select name="category" class="form-control">
+                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}" th:selected="${c == w.category}"></option>
+                      </select>
+                      <select name="exercise" class="form-control">
+                        <option th:each="e : ${exercises}" th:value="${e}" th:text="${e.name().replace('_', ' ')}" th:selected="${e == w.exercise}"></option>
+                      </select>
+                      <select name="intensity" class="form-control">
+                        <option th:each="i : ${intensities}" th:value="${i}" th:text="${i}" th:selected="${i == w.intensity}"></option>
+                      </select>
+                      <input type="number" name="sets" th:value="${w.sets}" placeholder="Sets" class="form-control" />
+                      <input type="number" name="reps" th:value="${w.reps}" placeholder="Reps" class="form-control" />
+                      <input type="number" name="durationMinutes" th:value="${w.durationMinutes}" placeholder="Minutes" class="form-control" />
+                      <input type="date" name="workoutDate" th:value="${w.workoutDate}" class="form-control" />
+                      <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
+                    </form>
+                  </td>
+                </tr>
+              </th:block>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
+

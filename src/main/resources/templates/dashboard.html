@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div class="app-shell">
+  <aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+  <div class="main-area">
+    <header th:replace="~{fragments/layout :: topbar('Dashboard')}"></header>
+
+    <main class="content">
+      <div th:replace="~{fragments/layout :: alerts}"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Welcome, <span th:text="${user != null ? user.fullName : #authentication.name}">User</span></h2>
+            <p class="text-muted">Overview of your fitness metrics, daily nutrition, and workouts.</p>
+          </div>
+          <a th:if="${goal == null}" th:href="@{/goals}" class="btn btn-primary">Set Up Fitness Goal</a>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">BMI</div>
+          <div class="stat-value" th:text="${goal != null ? #numbers.formatDecimal(goal.bmi, 1, 1) : '—'}">—</div>
+          <div class="stat-sub" th:text="${goal != null ? goal.bmiCategory : 'No goal configured'}">—</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">BMR (Mifflin-St Jeor)</div>
+          <div class="stat-value" th:text="${goal != null && goal.bmr != null ? #numbers.formatDecimal(goal.bmr, 1, 0) + ' kcal' : '—'}">—</div>
+          <div class="stat-sub">Basal Metabolic Rate</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">TDEE</div>
+          <div class="stat-value" th:text="${goal != null && goal.tdee != null ? #numbers.formatDecimal(goal.tdee, 1, 0) + ' kcal' : '—'}">—</div>
+          <div class="stat-sub">Total Daily Energy Expenditure</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Daily Calorie Target</div>
+          <div class="stat-value" th:text="${goal != null ? goal.targetCalories + ' kcal' : '—'}">—</div>
+          <div class="stat-sub" th:text="${goal != null ? goal.goalType.name().replace('_', ' ') + ' (' + goal.goalPace + ')' : 'Set a goal to calculate'}">—</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Today's Nutrition Summary</h3>
+            <a th:href="@{/food-log}" class="btn btn-secondary btn-sm">Open Food Log</a>
+          </div>
+          <table>
+            <tbody>
+              <tr>
+                <th>Calories Consumed</th>
+                <td th:text="${#numbers.formatDecimal(nutritionSummary.totalCalories, 1, 0)} + ' kcal'">0 kcal</td>
+              </tr>
+              <tr>
+                <th>Protein</th>
+                <td th:text="${#numbers.formatDecimal(nutritionSummary.totalProtein, 1, 1)} + ' g'">0 g</td>
+              </tr>
+              <tr>
+                <th>Carbohydrates</th>
+                <td th:text="${#numbers.formatDecimal(nutritionSummary.totalCarbs, 1, 1)} + ' g'">0 g</td>
+              </tr>
+              <tr>
+                <th>Fat</th>
+                <td th:text="${#numbers.formatDecimal(nutritionSummary.totalFat, 1, 1)} + ' g'">0 g</td>
+              </tr>
+              <tr>
+                <th>Logged Items Today</th>
+                <td th:text="${todayFoodCount}">0</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Workout Summary</h3>
+            <a th:href="@{/workouts}" class="btn btn-secondary btn-sm">Manage Workouts</a>
+          </div>
+          <p class="text-muted" style="margin-bottom: 12px;">
+            Total Sessions: <strong th:text="${workoutCount}">0</strong> &middot;
+            Total Duration: <strong th:text="${totalWorkoutMinutes} + ' min'">0 min</strong> &middot;
+            Calories Burned: <strong th:text="${totalWorkoutCalories} + ' kcal'">0 kcal</strong>
+          </p>
+
+          <div th:if="${#lists.isEmpty(recentWorkouts)}" class="text-muted">
+            No workouts logged yet. <a th:href="@{/workouts}">Log your first workout</a>.
+          </div>
+
+          <div class="table-wrapper" th:if="${!#lists.isEmpty(recentWorkouts)}">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Exercise</th>
+                  <th>Duration</th>
+                  <th>Burned</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="w : ${recentWorkouts}">
+                  <td th:text="${w.workoutDate}">2026-11-25</td>
+                  <td th:text="${w.exercise.name().replace('_', ' ')}">BENCH PRESS</td>
+                  <td th:text="${w.estimatedDuration} + ' min'">30 min</td>
+                  <td th:text="${#numbers.formatDecimal(w.caloriesBurned, 1, 0)} + ' kcal'">150 kcal</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
+

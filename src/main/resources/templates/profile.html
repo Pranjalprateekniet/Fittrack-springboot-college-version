@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profile')}"></head>
+<body>
+<div class="app-shell">
+  <aside th:replace="~{fragments/layout :: sidebar('profile')}"></aside>
+  <div class="main-area">
+    <header th:replace="~{fragments/layout :: topbar('Profile')}"></header>
+
+    <main class="content">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">User Information</h2>
+          </div>
+          <table>
+            <tbody>
+              <tr>
+                <th>Full Name</th>
+                <td th:text="${user != null ? user.fullName : '—'}">User</td>
+              </tr>
+              <tr>
+                <th>Email</th>
+                <td th:text="${user != null ? user.email : #authentication.name}">email@example.com</td>
+              </tr>
+              <tr>
+                <th>Role</th>
+                <td><span class="badge" th:text="${user != null ? user.role : 'USER'}">USER</span></td>
+              </tr>
+              <tr>
+                <th>Member Since</th>
+                <td th:text="${user != null && user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy-MM-dd') : '—'}">—</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <form th:action="@{/logout}" method="post" style="margin-top: 20px;">
+            <button type="submit" class="btn btn-danger">Logout</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Calculated Fitness Metrics</h2>
+            <a th:href="@{/goals}" class="btn btn-secondary btn-sm">Edit Goal</a>
+          </div>
+
+          <div th:if="${goal == null}" class="text-muted">
+            No fitness goal configured yet. <a th:href="@{/goals}">Set up your goal</a> to calculate BMI, BMR, and TDEE.
+          </div>
+
+          <table th:if="${goal != null}">
+            <tbody>
+              <tr>
+                <th>Goal Type</th>
+                <td th:text="${goal.goalType.name().replace('_', ' ')} + ' (' + ${goal.goalPace} + ')'">WEIGHT LOSS</td>
+              </tr>
+              <tr>
+                <th>BMI</th>
+                <td th:text="${#numbers.formatDecimal(goal.bmi, 1, 1)} + ' (' + ${goal.bmiCategory} + ')'">24.5 (NORMAL)</td>
+              </tr>
+              <tr>
+                <th>BMR</th>
+                <td th:text="${goal.bmr != null ? #numbers.formatDecimal(goal.bmr, 1, 0) + ' kcal/day' : '—'}">1800 kcal/day</td>
+              </tr>
+              <tr>
+                <th>TDEE</th>
+                <td th:text="${goal.tdee != null ? #numbers.formatDecimal(goal.tdee, 1, 0) + ' kcal/day' : '—'}">2500 kcal/day</td>
+              </tr>
+              <tr>
+                <th>Target Calories</th>
+                <td th:text="${goal.targetCalories} + ' kcal/day'">2000 kcal/day</td>
+              </tr>
+              <tr>
+                <th>Weight Target</th>
+                <td th:text="${goal.currentWeightKg} + ' kg → ' + ${goal.targetWeightKg} + ' kg'">80 → 74 kg</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
+
